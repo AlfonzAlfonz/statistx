@@ -10,10 +10,9 @@ export const stringType = (): StringType => ({
   render: () => null
 });
 
-export const literalType = (lit: string): LiteralType => ({
+export const literalType = <T extends string>(lit: T): LiteralType<T> => ({
   inherits: stringType(),
   label: lit,
   type: "literal",
-  create: () => lit,
-  render: () => null
+  create: () => lit
 });

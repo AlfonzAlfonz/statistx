@@ -9,27 +9,15 @@ interface Props {
 export const Preview: FC<Props> = ({ node }) => {
   return (
     <x.div>
-      <x.h2 fontSize="xl">State</x.h2>
-      {node?.state.map((s, i) => (
-        <x.div key={i} borderTopWidth={1} mt={2} pt={1}>
-          <x.div display="flex" justifyContent="space-between">
-            <x.div title={s.type.title}>{s.type.label}</x.div>
-            <x.div>{s.type.type}</x.div>
-          </x.div>
-          <x.pre pb={4}>
-            {JSON.stringify(s.value, null, 2)}
-          </x.pre>
-        </x.div>
-      ))}
       <x.h2 fontSize="xl" mt={4}>Result</x.h2>
-      {node?.result.map((s, i) => (
-        <x.div key={i}>
+      {node && Object.entries(node.result.value).map(([k, v], i) => (
+        <x.div key={i} display="flex" justifyContent="space-between" py={4}>
           <x.div display="flex" justifyContent="space-between">
-            <x.div title={s.type.title}>{s.type.label}</x.div>
-            <x.div>{s.type.type}</x.div>
+            <x.div title={k}>{k}</x.div>
+            {/* <x.div>{s.type.type}</x.div> */}
           </x.div>
           <x.pre pb={4}>
-            {JSON.stringify(s.value, null, 2)}
+            {JSON.stringify(v, null, 2)}
           </x.pre>
         </x.div>
       ))}

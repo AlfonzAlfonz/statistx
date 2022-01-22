@@ -17,6 +17,6 @@ export class Transaction {
   }
 
   public async commit () {
-    return await this.instance.execOperation(commitTransaction(this));
+    return await this.instance.execOp(commitTransaction(this));
   }
 }

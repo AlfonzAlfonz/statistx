@@ -1,37 +1,49 @@
-import { numberType, NumberType } from "../types/number";
-import { unionType, UnionType } from "../types/union";
-import { Resolver, SNode } from "../data";
-import { literalType, LiteralType } from "../types/string";
+import { Resolver } from "../resolver";
+import { NumberType, numberType } from "../types/number";
+import { ObjectType, objectType } from "../types/object";
+import { LiteralType, literalType } from "../types/string";
+import { UnionType, unionType } from "../types/union";
 
 export type MathOp = "add" | "sub" | "mul" | "div";
 
 export type MathResolver = Resolver<
-[UnionType<[LiteralType<"add">, LiteralType<"sub">, LiteralType<"mul">, LiteralType<"div">]>, NumberType, NumberType],
-[NumberType]
+UnionType<ObjectType<{
+  "operation": UnionType<LiteralType<"add"> | LiteralType<"sub"> | LiteralType<"mul"> | LiteralType<"div">>;
+  "a": NumberType;
+  "b": NumberType;
+}>>,
+null,
+ObjectType<{ "c": NumberType }>
 >;
 
 export const mathResolver = (): MathResolver => ({
   label: "Math",
   type: "math",
-  create: () => ({
-    state: [
-      unionType("MathOp", literalType("add"), literalType("sub"), literalType("mul"), literalType("div")),
-      numberType(),
-      numberType()
-    ],
-    result: [numberType()]
-  }),
-  exec: (o, a, b) => {
-    switch (o.value) {
-      case "add":
-        return [a.value + b.value];
-      case "sub":
-        return [a.value - b.value];
-      case "mul":
-        return [a.value * b.value];
-      case "div":
-        return [a.value / b.value];
-    }
+
+  propTypes: unionType("", objectType({
+    operation: unionType<LiteralType<"add"> | LiteralType<"sub"> | LiteralType<"mul"> | LiteralType<"div">>(
+      "MathOp",
+      literalType("add"),
+      literalType("sub"),
+      literalType("mul"),
+      literalType("div")
+    ),
+    a: numberType(),
+    b: numberType()
+  })),
+  resultTypes: objectType({ c: numberType() }),
+
+  initialState: null,
+
+  exec: ({ value: { operation, a, b } }) => {
+    return {
+      c: {
+        add: a + b,
+        sub: a - b,
+        mul: a * b,
+        div: a / b
+      }[operation]
+    };
   },
-  isResolved: (a, b) => a !== null && b !== null
+  shouldResolve: ({ value: { operation, a, b } }) => operation !== null && a !== null && b !== null
 });

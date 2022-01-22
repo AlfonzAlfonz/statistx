@@ -5,6 +5,5 @@ export type NumberType = DataType<number>;
 export const numberType = (): NumberType => ({
   label: "Number",
   type: "number",
-  create: () => 0,
-  render: () => null
+  create: () => 0
 });

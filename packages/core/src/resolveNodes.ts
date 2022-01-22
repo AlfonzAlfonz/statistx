@@ -1,42 +1,57 @@
-import { SNode, Resolver, Relation } from "./data";
+import { Relation, SNode } from "./data";
+import { Resolver } from "./resolver";
 
 export const resolveNodes = async (
   nodes: Map<string, SNode>,
   relations: Set<Relation>,
   resolvers: Map<string, Resolver>
 ) => {
-  const wasResolved = new Map<string, boolean>();
   const resolvableNodes = new Map(nodes.entries());
+
+  let i = 0;
 
   const cycle = async () => {
     const resolved = new Map<string, SNode>();
 
     for (const [id, node] of resolvableNodes) {
-      if (node.state.every(s => s !== null)) {
-        if (node.result.every(r => r !== null)) continue;
-        !wasResolved.has(id) && resolvableNodes.delete(id);
+      const resolver = resolvers.get(node.type)!;
 
-        const result = await resolvers.get(node.type)!.exec(...node.state);
+      // Update props of node
+      for (const [source, target] of relations) {
+        if (target[0] !== id) continue;
 
-        node.result.forEach((r, i) => {
-          r.value = result[i];
-        });
+        nodes.get(target[0])!.props.value[target[1]] = nodes.get(source[0])!.result.value[source[1]];
+      }
 
-        for (const rel of relations) {
-          if (rel[0][0] !== id) continue;
-          nodes.get(rel[1][0])!.state.find(s => s.id === rel[1][1])!.value = node.result.find(r => r.id === rel[0][1])!.value;
+      if (isNodeResolvable(node, resolver)) {
+        resolvableNodes.delete(id);
+        if (isNodeResolved(node)) continue;
+
+        const result = await resolver.exec(node.props as any, node.state);
+        i++;
+
+        for (const k of Object.keys(node.result.value)) {
+          node.result.value[k] = result[k];
         }
 
         resolved.set(id, node);
       } else {
-        node.result.forEach(r => {
-          r.value = null;
-        });
+        for (const k of Object.keys(node.result.value)) {
+          node.result.value[k] = null;
+        }
       }
     }
+
+    if (!resolvableNodes.size) return;
+
+    await cycle();
   };
 
-  if (!resolvableNodes.size) return;
-
   await cycle();
+  console.info(`resolving finished, ${i} nodes resolved successfully`);
 };
+
+const isNodeResolvable = (node: SNode, resolver: Resolver) =>
+  resolver.shouldResolve(node.props as any, node.state);
+
+const isNodeResolved = (node: SNode) => Object.values(node.result.value).every(r => r !== null);

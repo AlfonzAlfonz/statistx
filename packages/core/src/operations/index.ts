@@ -1,12 +1,8 @@
-import { Relation, Resolver, SNode } from "..";
+import { StatistxState } from "../StatistxCore";
 
 export interface Operation {
   type: string;
-  exec: (
-    nodes: Map<string, SNode>,
-    relations: Set<Relation>,
-    resolvers: Map<string, Resolver>
-  ) => unknown;
+  exec: (data: StatistxState & { execOp: (op: Operation) => unknown }) => unknown;
 }
 
 export const createOp = (type: string, exec: Operation["exec"]): Operation => ({ type, exec });
@@ -14,3 +10,8 @@ export const createOp = (type: string, exec: Operation["exec"]): Operation => ({
 export * from "./addNode";
 export * from "./addRelation";
 export * from "./addResolver";
+export * from "./clearNodeResult";
+export * from "./commitTransaction";
+export * from "./moveNode";
+export * from "./setNodeState";
+export * from "./updateDependencies";

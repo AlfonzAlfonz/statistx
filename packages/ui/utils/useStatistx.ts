@@ -2,7 +2,7 @@ import { Operation, SNode, StatistxCore } from "@statistx/core";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Edge, FlowElement } from "react-flow-renderer";
 
-export type StatistxContext = ReturnType<typeof useStatistx>;
+export type IStatistxContext = ReturnType<typeof useStatistx>;
 
 export const useStatistx = () => {
   const statistx = useRef<StatistxCore>(null!);
@@ -21,7 +21,7 @@ export const useStatistx = () => {
 
   const execOp = useCallback(async (op: Operation) => {
     setLoading(true);
-    await statistx.current.execOperation(op);
+    await statistx.current.execOp(op);
     flushToState();
     setLoading(false);
   }, [flushToState]);
@@ -53,7 +53,7 @@ const getElements = (s: StatistxCore): FlowElement[] => [...s.nodes].map(([id, n
   id,
   type: "generic",
   data: n,
-  position: { x: 0, y: 5 }
+  position: { x: n.internalState.position[0], y: n.internalState.position[1] }
 }));
 
 const getEdges = (s: StatistxCore): Edge[] => [...s.relations].map(([from, to]) => ({
@@ -65,5 +65,5 @@ const getEdges = (s: StatistxCore): Edge[] => [...s.relations].map(([from, to]) 
   targetHandle: `${to[1]}`
 }));
 
-export const StatistxContext = createContext<StatistxContext>(null!);
+export const StatistxContext = createContext<IStatistxContext>(null!);
 export const useStatistxContext = () => useContext(StatistxContext);

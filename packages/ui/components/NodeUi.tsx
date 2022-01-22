@@ -1,20 +1,33 @@
-import { SNode } from "@statistx/core";
+import { setNodeState, SNode } from "@statistx/core";
 import { x } from "@xstyled/styled-components";
 import { FC, memo } from "react";
 import { Handle, NodeProps, Position } from "react-flow-renderer";
-import { useStatistxContext } from "../utils/useStatistx";
+import { useStatistxContext } from "utils/useStatistx";
 
 export const NodeUi: FC<NodeProps<SNode>> = memo(({ data }) => {
-  const { instance } = useStatistxContext();
+  const { instance, execOp } = useStatistxContext();
+  const resolver = instance.current.resolvers.get(data.type);
+
   return (
-    <x.div p={2} borderWidth={2}>
-      {instance.current.resolvers.get(data.type)?.label}
+    <x.div p={2} borderWidth={2} bg="white">
+      <div>
+        {resolver?.label}
+      </div>
+
+      {resolver?.render && (
+        <resolver.render
+          props={data.props}
+          state={data.state}
+          setState={s => execOp(setNodeState(data.id, typeof s === "function" ? s(data.state) : s))}
+        />
+      )}
+
       <x.div pt={2}>
         <x.div mx={-3} display="flex">
           <x.div flexGrow={1}>
-            {data.state.map((n, i) => (
+            {Object.keys(data.props.value).map((k) => (
               <x.div
-                key={i}
+                key={k}
                 py={2}
                 display="flex"
                 alignItems="center"
@@ -22,9 +35,9 @@ export const NodeUi: FC<NodeProps<SNode>> = memo(({ data }) => {
                 fontSize="xs"
                 fontFamily="mono"
               >
-                <x.div w="100%" px={2}>{n.type.label}</x.div>
+                <x.div w="100%" px={2}>{k}</x.div>
                 <Handle
-                  id={n.id}
+                  id={k}
                   type="target"
                   position={Position.Left}
                   style={{
@@ -37,9 +50,9 @@ export const NodeUi: FC<NodeProps<SNode>> = memo(({ data }) => {
             ))}
           </x.div>
           <div>
-            {data.result?.map((r, i) => (
+            {data.result.value && Object.keys(data.result.value).map((k) => (
               <x.div
-                key={i}
+                key={k}
                 py={2}
                 display="flex"
                 minH={35}
@@ -48,9 +61,9 @@ export const NodeUi: FC<NodeProps<SNode>> = memo(({ data }) => {
                 fontSize="xs"
                 fontFamily="mono"
               >
-                <x.div w="100%" px={2}>{r.type.label}</x.div>
+                <x.div w="100%" px={2}>{k}</x.div>
                 <Handle
-                  id={r.id}
+                  id={k}
                   type="source"
                   position={Position.Left}
                   style={{

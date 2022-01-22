@@ -1,8 +1,8 @@
 import { createOp } from ".";
 import { Transaction } from "../Transaction";
 
-export const commitTransaction = (transaction: Transaction) => createOp("addNode", (...args) => {
+export const commitTransaction = (transaction: Transaction) => createOp("addNode", ({ execOp }) => {
   for (const op of transaction.operations) {
-    op.exec(...args);
+    execOp(op);
   }
 });

@@ -1,12 +1,11 @@
-import { addNode, addRelation, addResolver, mathResolver, numberResolver } from "@statistx/core";
+import { addNode, addRelation, addResolver, mathResolver, moveNode, numberResolver } from "@statistx/core";
 import { x } from "@xstyled/styled-components";
+import { Layout } from "components/Layout";
 import { NodeUi } from "components/NodeUi";
 import { Preview } from "components/Preview";
 import { FC, useEffect } from "react";
 import ReactFlow from "react-flow-renderer";
 import { StatistxContext, useStatistx } from "utils/useStatistx";
-
-import { Layout } from "../components/Layout";
 
 const Index: FC = () => {
   const s = useStatistx();
@@ -41,6 +40,9 @@ const Index: FC = () => {
             }}
             onNodeDoubleClick={(e, n) => {
               s.selectNode(s.instance.current.nodes.get(n.id));
+            }}
+            onNodeDragStop={(_, n) => {
+              s.execOp(moveNode(n.id, n.position.x, n.position.y));
             }}
           />
         </x.div>

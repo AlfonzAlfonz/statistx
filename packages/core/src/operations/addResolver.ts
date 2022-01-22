@@ -1,6 +1,6 @@
 import { createOp } from ".";
-import { Resolver } from "../data";
+import { Resolver } from "../resolver";
 
-export const addResolver = (resolver: Resolver<any>) => createOp("addResolver", (_, __, resolvers) => {
-  resolvers.set(resolver.type, resolver);
+export const addResolver = (resolver: Resolver<any, any, any>) => createOp("addResolver", ({ resolvers }) => {
+  resolvers.set(resolver.type, resolver as any);
 });
